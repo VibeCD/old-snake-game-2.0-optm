@@ -1,0 +1,1634 @@
+<!doctype html>
+<html lang="en"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  <meta name="color-scheme" content="dark"> 
+  <title>Snake Game</title> 
+  <style>  
+* {  
+    -webkit-tap-highlight-color: transparent;  
+    -webkit-text-size-adjust: 100%;  
+    touch-action: manipulation;  
+    margin: 0;  
+    padding: 0;  
+    box-sizing: border-box;  
+}  
+
+body {
+margin: 0;
+background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+color: white;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: flex-start;
+min-height: 100vh;
+height: 100vh;
+overflow: hidden;
+padding: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+* { animation: none !important; transition: none !important; }
+}
+
+/* ======================== GAME MODE OPTIMIZATION ======================== */
+.game-mode * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* ======================== HOME PAGE STYLES ======================== */
+#homePage {
+position: fixed;
+inset: 0;
+background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+z-index: 1000;
+overflow: hidden;
+}
+
+#homeCanvas {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+opacity: 0.3;
+}
+
+.home-content {
+position: relative;
+z-index: 10;
+text-align: center;
+animation: fadeInUp 1s ease-out;
+display: flex;
+flex-direction: column;
+align-items: center;
+}
+
+@keyframes fadeInUp {
+from {
+opacity: 0;
+transform: translateY(30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+.game-title {
+font-size: 72px;
+font-weight: bold;
+margin-bottom: 20px;
+background: linear-gradient(45deg, #00ff00, #ffeb3b, #00ff00);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+text-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+0%, 100% {
+filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.7));
+}
+50% {
+filter: drop-shadow(0 0 20px rgba(0, 255, 0, 1));
+}
+}
+
+.game-subtitle {
+font-size: 24px;
+color: #ffeb3b;
+margin-bottom: 50px;
+opacity: 0.9;
+}
+
+.play-btn {
+padding: 25px 60px;
+font-size: 32px;
+font-weight: bold;
+border: none;
+border-radius: 50px;
+cursor: pointer;
+background: linear-gradient(145deg, #00ff00, #00cc00);
+color: #0f0c29;
+box-shadow: 0 8px 30px rgba(0, 255, 0, 0.4);
+transition: all 0.3s ease;
+animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+0%, 100% {
+transform: scale(1);
+}
+50% {
+transform: scale(1.05);
+}
+}
+
+.play-btn:hover {
+transform: scale(1.1);
+box-shadow: 0 12px 40px rgba(0, 255, 0, 0.6);
+background: linear-gradient(145deg, #00ff00, #00ff00);
+}
+
+.play-btn:active {
+transform: scale(0.98);
+}
+
+.contact-btn {
+padding: 18px 50px;
+font-size: 24px;
+font-weight: bold;
+border: none;
+border-radius: 50px;
+cursor: pointer;
+background: linear-gradient(145deg, #ff6a00, #ee0979);
+color: white;
+box-shadow: 0 8px 30px rgba(238, 9, 121, 0.4);
+transition: all 0.3s ease;
+margin-top: 20px;
+}
+
+.contact-btn:hover {
+transform: scale(1.1);
+box-shadow: 0 12px 40px rgba(238, 9, 121, 0.6);
+}
+
+.contact-btn:active {
+transform: scale(0.98);
+}
+
+#contactModal {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 1100;
+}
+
+.contact-modal-content {
+background: linear-gradient(135deg, #ff6a00, #ee0979);
+padding: 40px 50px;
+border-radius: 20px;
+text-align: center;
+color: white;
+max-width: 90%;
+width: 400px;
+position: relative;
+}
+
+.contact-modal-content h2 {
+margin-bottom: 30px;
+font-size: 28px;
+}
+
+.close-modal-btn {
+position: absolute;
+top: 10px;
+right: 10px;
+background: rgba(255, 255, 255, 0.2);
+border: none;
+color: white;
+font-size: 28px;
+font-weight: bold;
+width: 40px;
+height: 40px;
+border-radius: 50%;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: all 0.3s ease;
+line-height: 1;
+}
+
+.close-modal-btn:hover {
+background: rgba(255, 255, 255, 0.3);
+transform: scale(1.1);
+}
+
+.close-modal-btn:active {
+transform: scale(0.95);
+}
+
+.developer-link-btn {
+padding: 20px 40px;
+font-size: 22px;
+font-weight: bold;
+border: none;
+border-radius: 12px;
+cursor: pointer;
+background: linear-gradient(145deg, #00ff00, #00cc00);
+color: #0f0c29;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+transition: all 0.3s ease;
+}
+
+.developer-link-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.developer-link-btn:active {
+transform: scale(0.95);
+}
+
+#devLinkModal {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 1100;
+}
+
+.dev-link-modal-content {
+background: linear-gradient(135deg, #ff6a00, #ee0979);
+padding: 40px 50px;
+border-radius: 20px;
+text-align: center;
+color: white;
+max-width: 90%;
+width: 400px;
+}
+
+.dev-link-modal-content h2 {
+margin-bottom: 20px;
+font-size: 28px;
+}
+
+.dev-link-modal-content p {
+margin-bottom: 30px;
+font-size: 20px;
+}
+
+.meet-dev-btn {
+padding: 20px 40px;
+font-size: 22px;
+font-weight: bold;
+border: none;
+border-radius: 12px;
+cursor: pointer;
+background: linear-gradient(145deg, #00ff00, #00cc00);
+color: #0f0c29;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+transition: all 0.3s ease;
+margin: 8px;
+}
+
+.meet-dev-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.meet-dev-btn:active {
+transform: scale(0.95);
+}
+
+#loadingModal {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 1150;
+}
+
+.loading-modal-content {
+background: linear-gradient(135deg, #ff6a00, #ee0979);
+padding: 50px 60px;
+border-radius: 20px;
+text-align: center;
+color: white;
+max-width: 90%;
+width: 400px;
+}
+
+.loading-modal-content h2 {
+margin-bottom: 30px;
+font-size: 28px;
+}
+
+.loading-spinner {
+width: 60px;
+height: 60px;
+border: 6px solid rgba(255, 255, 255, 0.3);
+border-top: 6px solid white;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+margin: 0 auto;
+}
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+#thanksModal {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 1200;
+}
+
+.thanks-modal-content {
+background: linear-gradient(135deg, #00ff00, #00cc00);
+padding: 40px 50px;
+border-radius: 20px;
+text-align: center;
+color: #0f0c29;
+max-width: 90%;
+width: 400px;
+}
+
+.thanks-modal-content h2 {
+margin-bottom: 20px;
+font-size: 28px;
+font-weight: bold;
+}
+
+.thanks-modal-content p {
+margin-bottom: 30px;
+font-size: 20px;
+}
+
+.try-again-genz-btn {
+padding: 20px 40px;
+font-size: 22px;
+font-weight: bold;
+border: none;
+border-radius: 12px;
+cursor: pointer;
+background: linear-gradient(145deg, #ff6a00, #ee0979);
+color: white;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+transition: all 0.3s ease;
+margin: 8px;
+}
+
+.try-again-genz-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.try-again-genz-btn:active {
+transform: scale(0.95);
+}
+
+#homeConfirmModal {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 1100;
+}
+
+.home-confirm-modal-content {
+background: linear-gradient(135deg, #ff6a00, #ee0979);
+padding: 40px 50px;
+border-radius: 20px;
+text-align: center;
+color: white;
+max-width: 90%;
+width: 400px;
+position: relative;
+}
+
+.home-confirm-modal-content h2 {
+margin-bottom: 30px;
+font-size: 28px;
+}
+
+.home-confirm-btn {
+padding: 20px 40px;
+font-size: 22px;
+font-weight: bold;
+border: none;
+border-radius: 12px;
+cursor: pointer;
+background: linear-gradient(145deg, #00ff00, #00cc00);
+color: #0f0c29;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+transition: all 0.3s ease;
+margin: 8px;
+}
+
+.home-confirm-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+.home-confirm-btn:active {
+transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+.game-title {
+font-size: 48px;
+}
+
+.game-subtitle {
+font-size: 18px;
+margin-bottom: 40px;
+}
+
+.play-btn {
+padding: 20px 50px;
+font-size: 28px;
+}
+
+.contact-btn {
+padding: 16px 45px;
+font-size: 22px;
+margin-top: 15px;
+}
+}
+
+@media (max-width: 480px) {
+.game-title {
+font-size: 36px;
+}
+
+.game-subtitle {
+font-size: 16px;
+margin-bottom: 30px;
+}
+
+.play-btn {
+padding: 18px 45px;
+font-size: 24px;
+}
+
+.contact-btn {
+padding: 15px 40px;
+font-size: 20px;
+margin-top: 12px;
+}
+}
+
+/* ======================== GAME PAGE STYLES ======================== */
+#gamePage {
+display: none;
+width: 100%;
+height: 100%;
+flex-direction: column;
+align-items: center;
+justify-content: flex-start;
+position: relative;
+}
+
+#score {
+margin: 8px 0;
+font-size: 20px;
+font-weight: bold;
+color: #ffeb3b;
+text-shadow: 1px 1px 5px black;
+flex-shrink: 0;
+}
+
+#canvasWrapper {
+position: relative;
+flex-shrink: 0;
+margin: 10px 0;
+}
+
+canvas {
+background: radial-gradient(circle at top left, #1f4037, #99f2c8);
+border: 4px solid #ffeb3b;
+border-radius: 12px;
+touch-action: none;
+display: block;
+margin: 0 auto;
+}
+
+#pauseOverlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.7);
+display: none;
+align-items: center;
+justify-content: center;
+font-size: 48px;
+font-weight: bold;
+color: #ffeb3b;
+text-shadow: 2px 2px 10px black;
+pointer-events: none;
+border-radius: 8px;
+}
+
+.controls, .movement-controls {
+display: flex;
+justify-content: center;
+gap: 15px;
+margin-top: 10px;
+flex-shrink: 0;
+flex-wrap: wrap;
+}
+
+.movement-controls {
+display: grid;
+grid-template-columns: 80px 80px 80px;
+grid-template-rows: 80px 80px;
+gap: 14px;
+margin-top: 15px;
+}
+
+.empty { visibility: hidden; }
+
+.btn {
+padding: 18px 36px;
+font-size: 20px;
+font-weight: bold;
+border: none;
+border-radius: 12px;
+cursor: pointer;
+background: linear-gradient(145deg, #ff6a00, #ee0979);
+color: white;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.movement-controls .btn {
+display: flex;
+align-items: center;
+justify-content: center;
+padding: 0;
+font-size: 22px;
+}
+
+.btn:active {
+transform: scale(0.95);
+}
+
+#homeBtn {
+position: fixed;
+top: 10px;
+right: 10px;
+width: 50px;
+height: 50px;
+padding: 0;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+background: linear-gradient(145deg, #ff6a00, #ee0979);
+color: white;
+box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+z-index: 10;
+}
+
+#homeBtn:hover {
+transform: scale(1.1);
+box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+
+#homeBtn:active {
+transform: scale(0.95);
+}
+
+#gameOverModal,
+#quitEndModal {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+display: none;
+align-items: center;
+justify-content: center;
+z-index: 100;
+}
+
+.modal-content {
+background: linear-gradient(135deg, #ff6a00, #ee0979);
+padding: 30px 40px;
+border-radius: 20px;
+text-align: center;
+color: white;
+max-width: 90%;
+width: 400px;
+}
+
+.modal-content h2 {
+margin-bottom: 20px;
+font-size: 28px;
+}
+
+.modal-content p {
+margin-bottom: 25px;
+font-size: 18px;
+}
+
+.modal-content .btn {
+margin: 8px;
+}
+
+/* Desktop optimizations */
+@media (min-width: 768px) {
+body {
+padding: 20px;
+}
+
+#score {  
+    font-size: 24px;  
+    margin: 12px 0;  
+}  
+  
+.movement-controls {  
+    display: none;  
+}  
+  
+.controls {  
+    margin-top: 20px;  
+}  
+  
+#pauseOverlay {  
+    font-size: 64px;  
+}
+
+#homeBtn {
+    top: 10px;
+    right: 10px;
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+}
+}
+
+/* Mobile small screen adjustments */
+@media (max-width: 480px) {
+#gamePage {
+padding: 5px;
+}
+
+#score {  
+    font-size: 18px;  
+    margin: 5px 0;  
+}  
+  
+#canvasWrapper {  
+    margin: 5px 0;  
+}  
+  
+.movement-controls {  
+    grid-template-columns: 70px 70px 70px;  
+    grid-template-rows: 70px 70px;  
+    gap: 12px;  
+    margin-top: 10px;  
+}  
+  
+.controls {  
+    gap: 10px;  
+    margin-top: 10px;  
+}  
+  
+.btn {  
+    padding: 16px 32px;  
+    font-size: 18px;  
+}  
+  
+#pauseOverlay {  
+    font-size: 36px;  
+}  
+  
+.modal-content {  
+    padding: 20px 25px;  
+    width: 90%;  
+}  
+  
+.modal-content h2 {  
+    font-size: 24px;  
+    margin-bottom: 15px;  
+}  
+  
+.modal-content p {  
+    font-size: 16px;  
+    margin-bottom: 20px;  
+}
+
+.contact-modal-content, .dev-link-modal-content, .thanks-modal-content {
+    padding: 30px 35px;
+    width: 90%;
+}
+
+.contact-modal-content h2, .dev-link-modal-content h2, .thanks-modal-content h2 {
+    font-size: 24px;
+}
+
+.developer-link-btn, .meet-dev-btn, .try-again-genz-btn {
+    padding: 18px 35px;
+    font-size: 20px;
+}
+
+#homeBtn {
+    top: 10px;
+    right: 10px;
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+}
+}
+
+/* Very small screens */
+@media (max-height: 600px) {
+#score {
+font-size: 16px;
+margin: 3px 0;
+}
+
+#canvasWrapper {  
+    margin: 3px 0;  
+}  
+  
+.movement-controls {  
+    grid-template-columns: 45px 45px 45px;  
+    grid-template-rows: 45px 45px;  
+    gap: 6px;  
+    margin-top: 5px;  
+}  
+  
+.controls {  
+    margin-top: 5px;  
+    gap: 8px;  
+}  
+  
+.btn {  
+    padding: 14px 28px;  
+    font-size: 17px;  
+}
+
+#homeBtn {
+    top: 8px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+}
+}
+</style> 
+ </head> 
+ <body> <!-- HOME PAGE --> 
+  <div id="homePage"> 
+   <canvas id="homeCanvas"></canvas> 
+   <div class="home-content"> 
+    <h1 class="game-title">SNAKE</h1> 
+    <p class="game-subtitle">Classic Retro Action</p> <button class="play-btn" id="playBtn">PLAY</button> <button class="contact-btn" id="contactBtn">CONTACT</button> 
+   </div> 
+  </div> <!-- CONTACT MODAL --> 
+  <div id="contactModal"> 
+   <div class="contact-modal-content"> <button class="close-modal-btn" id="closeContactModal">×</button> 
+    <h2>Contact Developer 💬</h2> <button class="developer-link-btn" id="developerLinkBtn">Hit Me Up 🔥</button> 
+   </div> 
+  </div> <!-- DEVELOPER LINK MODAL --> 
+  <div id="devLinkModal"> 
+   <div class="dev-link-modal-content"> 
+    <h2>Be A Part of Developer 🚀</h2> 
+    <p>Click here to meet developer 👇✨</p> <button class="meet-dev-btn" id="meetDevBtn">Let's Connect 💫</button> 
+   </div> 
+  </div> <!-- LOADING MODAL --> 
+  <div id="loadingModal"> 
+   <div class="loading-modal-content"> 
+    <h2>Loading... 🚀</h2> 
+    <div class="loading-spinner"></div> 
+   </div> 
+  </div> <!-- THANKS MODAL --> 
+  <div id="thanksModal"> 
+   <div class="thanks-modal-content"> 
+    <h2>You're the Real MVP! 🔥</h2> 
+    <p>No cap, thanks for checking out the dev's profile fam! 💯</p> <button class="try-again-genz-btn" id="runItBackBtn">Run It Back? 🎮</button> 
+   </div> 
+  </div> <!-- HOME CONFIRM MODAL --> 
+  <div id="homeConfirmModal"> 
+   <div class="home-confirm-modal-content"> <button class="close-modal-btn" id="closeHomeConfirmModal">×</button> 
+    <h2>Finna Bounce to Home? 🏠</h2> <button class="home-confirm-btn" id="confirmHomeBtn">Yeah, Take Me Home 🔥</button> <button class="home-confirm-btn" id="cancelHomeBtn">Nah, Keep Playing 🎮</button> 
+   </div> 
+  </div> <!-- GAME PAGE --> 
+  <div id="gamePage"> <button class="btn" id="homeBtn">🏠</button> 
+   <div id="score">
+     Score: 0 
+   </div> 
+   <div id="canvasWrapper"> 
+    <canvas id="game"></canvas> 
+    <div id="pauseOverlay">
+      PAUSED 
+    </div> 
+   </div> 
+   <div class="movement-controls"> 
+    <div class="empty"></div> <button class="btn" data-dir="UP">↑</button> 
+    <div class="empty"></div> <button class="btn" data-dir="LEFT">←</button> <button class="btn" data-dir="DOWN">↓</button> <button class="btn" data-dir="RIGHT">→</button> 
+   </div> 
+   <div class="controls"> <button class="btn" id="pauseResumeBtn">Pause</button> <button class="btn" id="restartBtn">Restart</button> 
+   </div> 
+   <div id="gameOverModal"> 
+    <div class="modal-content"> 
+     <h2>Game Over!</h2> 
+     <p id="finalScore">Score: 0</p> <button class="btn" id="restartModalBtn">Restart</button> <button class="btn" id="quitModalBtn">Quit</button> 
+    </div> 
+   </div> 
+   <div id="quitEndModal"> 
+    <div class="modal-content"> 
+     <h2>Thanks for Playing</h2> 
+     <p>Want to try again?</p> <button class="btn" id="tryAgainBtn">Try Again</button> <button class="btn" id="contactFromQuitBtn">CONTACT</button> 
+    </div> 
+   </div> 
+  </div> 
+  <script>  
+"use strict";
+
+document.addEventListener("DOMContentLoaded", () => {
+  
+/* ======================== HOME PAGE ANIMATION ======================== */
+const homeCanvas = document.getElementById("homeCanvas");
+const homeCtx = homeCanvas.getContext("2d");
+
+function resizeHomeCanvas() {
+  homeCanvas.width = window.innerWidth;
+  homeCanvas.height = window.innerHeight;
+}
+resizeHomeCanvas();
+
+let homeResizeListener = () => resizeHomeCanvas();
+window.addEventListener("resize", homeResizeListener);
+
+// Animated snake on home page
+let homeSnakes = [];
+const numSnakes = 3;
+const tileSize = 20;
+
+class HomeSnake {
+  constructor() {
+    this.reset();
+  }
+
+  reset() {
+    this.body = [];
+    const startX = Math.floor(Math.random() * (homeCanvas.width / tileSize));
+    const startY = Math.floor(Math.random() * (homeCanvas.height / tileSize));
+    const length = 10 + Math.floor(Math.random() * 20);
+
+    for (let i = 0; i < length; i++) {
+      this.body.push({ x: startX - i, y: startY });
+    }
+
+    this.direction = ['UP', 'DOWN', 'LEFT', 'RIGHT'][Math.floor(Math.random() * 4)];
+    this.hue = Math.random() * 360;
+    this.speed = 0.05 + Math.random() * 0.05;
+    this.timer = 0;
+  }
+
+  update(dt) {
+    this.timer += dt;
+    if (this.timer < this.speed) return;
+    this.timer = 0;
+
+    if (Math.random() < 0.05) {
+      const directions = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
+      this.direction = directions[Math.floor(Math.random() * 4)];
+    }
+
+    let head = { ...this.body[0] };
+
+    if (this.direction === 'UP') head.y--;
+    if (this.direction === 'DOWN') head.y++;
+    if (this.direction === 'LEFT') head.x--;
+    if (this.direction === 'RIGHT') head.x++;
+
+    if (head.x < 0) head.x = Math.floor(homeCanvas.width / tileSize);
+    if (head.x > homeCanvas.width / tileSize) head.x = 0;
+    if (head.y < 0) head.y = Math.floor(homeCanvas.height / tileSize);
+    if (head.y > homeCanvas.height / tileSize) head.y = 0;
+
+    this.body.unshift(head);
+    this.body.pop();
+
+    this.hue = (this.hue + 0.5) % 360;
+  }
+
+  draw() {
+    for (let i = 0; i < this.body.length; i++) {
+      const segment = this.body[i];
+      const alpha = 1 - (i / this.body.length) * 0.7;
+      homeCtx.fillStyle = `hsla(${this.hue}, 80%, 50%, ${alpha})`;
+      homeCtx.fillRect(
+        segment.x * tileSize,
+        segment.y * tileSize,
+        tileSize - 2,
+        tileSize - 2
+      );
+    }
+  }
+}
+
+for (let i = 0; i < numSnakes; i++) {
+  homeSnakes.push(new HomeSnake());
+}
+
+let lastHomeTime = 0;
+let homeAnimationRunning = true;
+
+function animateHome(time) {
+  if (!homeAnimationRunning) return;
+  
+  const dt = (time - lastHomeTime) / 1000;
+  lastHomeTime = time;
+
+  homeCtx.fillStyle = 'rgba(15, 12, 41, 0.1)';
+  homeCtx.fillRect(0, 0, homeCanvas.width, homeCanvas.height);
+
+  homeSnakes.forEach(snake => {
+    snake.update(dt);
+    snake.draw();
+  });
+
+  requestAnimationFrame(animateHome);
+}
+requestAnimationFrame(animateHome);
+
+/* ======================== PAGE TRANSITION ======================== */
+let gameWasPaused = false;
+
+document.getElementById('playBtn').addEventListener('click', () => {
+  homeAnimationRunning = false;
+  
+  // FIX #7: Clean up home canvas completely
+  homeCtx.setTransform(1, 0, 0, 1, 0, 0);
+  homeCtx.clearRect(0, 0, homeCanvas.width, homeCanvas.height);
+  homeCanvas.width = 0;
+  homeCanvas.height = 0;
+  
+  // FIX #8: Remove home page event listeners
+  window.removeEventListener("resize", homeResizeListener);
+  
+  document.getElementById('homePage').style.display = 'none';
+  document.getElementById('gamePage').style.display = 'flex';
+  
+  // FIX #10: Enable game mode optimization
+  document.body.classList.add('game-mode');
+  
+  initGame();
+});
+
+/* ======================== CONTACT MODAL HANDLERS ======================== */
+const contactModal = document.getElementById('contactModal');
+const devLinkModal = document.getElementById('devLinkModal');
+const loadingModal = document.getElementById('loadingModal');
+const thanksModal = document.getElementById('thanksModal');
+const homeConfirmModal = document.getElementById('homeConfirmModal');
+const instagramLink = 'https://www.instagram.com/m4hi_nfx?igsh=ZHRzcWxkYTI1OXRh';
+
+let userVisitedProfile = false;
+let loadingStartTime = 0;
+let loadingTimeout = null;
+
+document.getElementById('contactBtn').addEventListener('click', () => {
+  contactModal.style.display = 'flex';
+});
+
+document.getElementById('closeContactModal').addEventListener('click', () => {
+  contactModal.style.display = 'none';
+});
+
+document.getElementById('developerLinkBtn').addEventListener('click', () => {
+  window.open(instagramLink, '_blank');
+  contactModal.style.display = 'none';
+});
+
+contactModal.addEventListener('click', (e) => {
+  if (e.target === contactModal) {
+    contactModal.style.display = 'none';
+  }
+});
+
+document.getElementById('meetDevBtn').addEventListener('click', () => {
+  devLinkModal.style.display = 'none';
+  loadingModal.style.display = 'flex';
+  
+  loadingStartTime = Date.now();
+  
+  window.open(instagramLink, '_blank');
+  
+  loadingTimeout = setTimeout(() => {
+    loadingModal.style.display = 'none';
+    thanksModal.style.display = 'flex';
+    userVisitedProfile = true;
+  }, 6000);
+});
+
+devLinkModal.addEventListener('click', (e) => {
+  if (e.target === devLinkModal) {
+    devLinkModal.style.display = 'none';
+    if (gameWasPaused && gameRunning) {
+      paused = false;
+      pauseResumeBtn.textContent = "Pause";
+      pauseOverlay.style.display = "none";
+      lastTime = performance.now();
+      lastFrameTime = performance.now();
+      requestAnimationFrame(loop);
+    }
+  }
+});
+
+document.getElementById('contactFromQuitBtn').addEventListener('click', () => {
+  quitModal.style.display = 'none';
+  devLinkModal.style.display = 'flex';
+});
+
+document.getElementById('runItBackBtn').addEventListener('click', () => {
+  thanksModal.style.display = 'none';
+  userVisitedProfile = false;
+  resetGame();
+});
+
+thanksModal.addEventListener('click', (e) => {
+  if (e.target === thanksModal) {
+    thanksModal.style.display = 'none';
+    userVisitedProfile = false;
+    resetGame();
+  }
+});
+
+document.getElementById('homeBtn').addEventListener('click', () => {
+  if (gameRunning) {
+    gameWasPaused = true;
+    paused = true;
+    pauseResumeBtn.textContent = "Resume";
+    pauseOverlay.style.display = "flex";
+  }
+  homeConfirmModal.style.display = 'flex';
+});
+
+document.getElementById('closeHomeConfirmModal').addEventListener('click', () => {
+  homeConfirmModal.style.display = 'none';
+  if (gameWasPaused && gameRunning) {
+    paused = false;
+    gameWasPaused = false;
+    pauseResumeBtn.textContent = "Pause";
+    pauseOverlay.style.display = "none";
+    lastTime = performance.now();
+    lastFrameTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+});
+
+document.getElementById('confirmHomeBtn').addEventListener('click', () => {
+  homeConfirmModal.style.display = 'none';
+  document.getElementById('gamePage').style.display = 'none';
+  document.getElementById('homePage').style.display = 'flex';
+  
+  // FIX #10: Disable game mode optimization
+  document.body.classList.remove('game-mode');
+  
+  // FIX #11: Re-enable resize listener for home
+  resizeHomeCanvas();
+  window.addEventListener("resize", homeResizeListener);
+  
+  homeAnimationRunning = true;
+  requestAnimationFrame(animateHome);
+  gameRunning = false;
+  paused = false;
+  gameWasPaused = false;
+});
+
+document.getElementById('cancelHomeBtn').addEventListener('click', () => {
+  homeConfirmModal.style.display = 'none';
+  if (gameWasPaused && gameRunning) {
+    paused = false;
+    gameWasPaused = false;
+    pauseResumeBtn.textContent = "Pause";
+    pauseOverlay.style.display = "none";
+    lastTime = performance.now();
+    lastFrameTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+});
+
+homeConfirmModal.addEventListener('click', (e) => {
+  if (e.target === homeConfirmModal) {
+    homeConfirmModal.style.display = 'none';
+    if (gameWasPaused && gameRunning) {
+      paused = false;
+      gameWasPaused = false;
+      pauseResumeBtn.textContent = "Pause";
+      pauseOverlay.style.display = "none";
+      lastTime = performance.now();
+      lastFrameTime = performance.now();
+      requestAnimationFrame(loop);
+    }
+  }
+});
+
+/* ======================== CONFIGURATION ======================== */
+const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+const CONFIG = Object.freeze({
+  TILE_SIZE: 20,
+  UI_HEIGHT: 300,
+  INITIAL_SPEED: isMobile ? 5 : 6,
+  MAX_SPEED: isMobile ? 8 : 15, // FIX #12: Lower max speed on mobile
+  SPEED_INCREMENT_SCORE: 5,
+  SLOWDOWN_THRESHOLD: 15,
+  SLOWDOWN_FACTOR: 0.7,
+  TARGET_FPS: 30, // FIX #4: Lower logic FPS
+  MIN_COLS: 10,
+  MIN_ROWS: 10
+});
+
+/* ======================== CANVAS SETUP (HiDPI Support) ======================== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d", { alpha: false });
+
+// FIX #2: Offscreen canvas for static walls
+let wallCanvas = document.createElement('canvas');
+let wallCtx = wallCanvas.getContext('2d');
+let wallsNeedRedraw = true;
+
+let cols, rows;
+let dpr = window.devicePixelRatio || 1;
+let gameResizeListener = null;
+
+function resizeCanvas() {
+  dpr = window.devicePixelRatio || 1;
+
+  const displayWidth = Math.floor(window.innerWidth / CONFIG.TILE_SIZE) * CONFIG.TILE_SIZE;  
+  const displayHeight = Math.floor((window.innerHeight - CONFIG.UI_HEIGHT) / CONFIG.TILE_SIZE) * CONFIG.TILE_SIZE;  
+    
+  canvas.style.width = displayWidth + 'px';  
+  canvas.style.height = displayHeight + 'px';  
+    
+  canvas.width = displayWidth * dpr;  
+  canvas.height = displayHeight * dpr;  
+  
+  // FIX #1: Reset transform before scaling
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.scale(dpr, dpr);  
+    
+  cols = Math.max(CONFIG.MIN_COLS, displayWidth / CONFIG.TILE_SIZE);  
+  rows = Math.max(CONFIG.MIN_ROWS, displayHeight / CONFIG.TILE_SIZE);
+  
+  // FIX #2: Resize and redraw wall canvas
+  wallCanvas.width = displayWidth;
+  wallCanvas.height = displayHeight;
+  wallsNeedRedraw = true;
+  drawWalls();
+}
+
+// FIX #2: Draw walls once to offscreen canvas
+function drawWalls() {
+  if (!wallsNeedRedraw) return;
+  
+  wallCtx.clearRect(0, 0, wallCanvas.width, wallCanvas.height);
+  wallCtx.fillStyle = "#f44336";
+  
+  for (let i = 0; i < cols; i++) {
+    wallCtx.fillRect(i * CONFIG.TILE_SIZE, 0, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+    wallCtx.fillRect(i * CONFIG.TILE_SIZE, (rows - 1) * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+  }
+  for (let i = 0; i < rows; i++) {
+    wallCtx.fillRect(0, i * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+    wallCtx.fillRect((cols - 1) * CONFIG.TILE_SIZE, i * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+  }
+  
+  wallsNeedRedraw = false;
+}
+
+let resizeTimeout;
+gameResizeListener = () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    const oldCols = cols;
+    const oldRows = rows;
+
+    resizeCanvas();  
+        
+    if (oldCols !== cols || oldRows !== rows) {  
+      snake = snake.filter(s =>   
+        s.x > 0 && s.x < cols - 1 &&   
+        s.y > 0 && s.y < rows - 1  
+      );  
+      
+      // FIX #13: Rebuild occupancy set
+      occupiedCells.clear();
+      snake.forEach(s => occupiedCells.add(s.x + "," + s.y));
+        
+      if (snake.length === 0 && gameRunning) {  
+        endGame();  
+      } else if (gameRunning) {  
+        food = randomFood();  
+      }  
+    }  
+  }, 250);
+};
+
+/* ======================== GAME STATE ======================== */
+let snake = [];
+let direction = "RIGHT";
+let nextDirection = "RIGHT";
+let food = null;
+let score = 0;
+let gameRunning = false;
+let paused = false;
+
+// FIX #13: Use Set for collision detection
+let occupiedCells = new Set();
+
+/* ======================== SPEED ======================== */
+let speed = CONFIG.INITIAL_SPEED;
+let lastSpeedIncrease = 0;
+
+/* ======================== TIMING ======================== */
+let lastTime = 0;
+let accumulator = 0;
+let lastFrameTime = 0;
+const FRAME_TIME = 1000 / CONFIG.TARGET_FPS;
+
+// FIX #15: Track if score changed for batched UI update
+let scoreChanged = false;
+
+/* ======================== INPUT SYSTEM ======================== */
+let lastInputTime = 0;
+const INPUT_DEBOUNCE = 16;
+
+let touchStartX = 0;
+let touchStartY = 0;
+const SWIPE_THRESHOLD = 50;
+
+function setDir(dir) {
+  const now = performance.now();
+  if (now - lastInputTime < INPUT_DEBOUNCE) return;
+
+  if ((dir === "LEFT" && direction !== "RIGHT") ||  
+      (dir === "RIGHT" && direction !== "LEFT") ||
+      (dir === "UP" && direction !== "DOWN") ||
+      (dir === "DOWN" && direction !== "UP")) {
+    nextDirection = dir;
+    lastInputTime = now;
+  }
+}
+
+document.querySelectorAll('.movement-controls .btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const dir = btn.dataset.dir;
+    if (dir) setDir(dir);
+  });
+});
+
+document.addEventListener("keydown", e => {
+  const keyMap = {
+    'ArrowUp': 'UP',
+    'ArrowDown': 'DOWN',
+    'ArrowLeft': 'LEFT',
+    'ArrowRight': 'RIGHT'
+  };
+  if (keyMap[e.key]) {
+    e.preventDefault();
+    setDir(keyMap[e.key]);
+  }
+});
+
+// FIX #9: Use passive: true for touch handlers
+canvas.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+canvas.addEventListener('touchend', (e) => {
+  const deltaX = e.changedTouches[0].clientX - touchStartX;
+  const deltaY = e.changedTouches[0].clientY - touchStartY;
+
+  if (Math.abs(deltaX) < SWIPE_THRESHOLD && Math.abs(deltaY) < SWIPE_THRESHOLD) {
+    return;
+  }
+
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    setDir(deltaX > 0 ? 'RIGHT' : 'LEFT');
+  } else {
+    setDir(deltaY > 0 ? 'DOWN' : 'UP');
+  }
+}, { passive: true });
+
+/* ======================== VISIBILITY CHANGE HANDLER ======================== */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && gameRunning && !paused) {
+    gameWasPaused = true;
+    paused = true;
+    pauseResumeBtn.textContent = "Resume";
+    pauseOverlay.style.display = "flex";
+  }
+});
+
+window.addEventListener('blur', () => {
+  if (gameRunning && !paused) {
+    gameWasPaused = true;
+    paused = true;
+    pauseResumeBtn.textContent = "Resume";
+    pauseOverlay.style.display = "flex";
+  }
+});
+
+window.addEventListener('focus', () => {
+  if (gameWasPaused && gameRunning && paused &&
+      devLinkModal.style.display !== 'flex' &&
+      contactModal.style.display !== 'flex' &&
+      thanksModal.style.display !== 'flex') {
+    gameWasPaused = false;
+  }
+});
+
+/* ======================== HELPERS ======================== */
+function randomFood() {
+  let newFood;
+  let attempts = 0;
+  const maxAttempts = 100; // FIX #14: Cap attempts to prevent spikes
+
+  do {
+    newFood = {
+      x: Math.floor(Math.random() * (cols - 2)) + 1,
+      y: Math.floor(Math.random() * (rows - 2)) + 1
+    };
+    attempts++;
+    if (attempts > maxAttempts) {
+      return newFood;
+    }
+  } while (occupiedCells.has(newFood.x + "," + newFood.y)); // FIX #13: Use Set
+
+  return newFood;
+}
+
+function calculateSpeed() {
+  let baseSpeed = CONFIG.INITIAL_SPEED + Math.floor(score / CONFIG.SPEED_INCREMENT_SCORE);
+  
+  if (baseSpeed > CONFIG.MAX_SPEED) {
+    baseSpeed = CONFIG.MAX_SPEED;
+  }
+  
+  if (score >= CONFIG.SLOWDOWN_THRESHOLD) {
+    const weightFactor = 1 - ((snake.length - 3) * 0.015);
+    baseSpeed = baseSpeed * Math.max(CONFIG.SLOWDOWN_FACTOR, weightFactor);
+  }
+  
+  return baseSpeed;
+}
+
+/* ======================== UPDATE ======================== */
+function update(dt) {
+  if (paused || !gameRunning) return;
+
+  speed = calculateSpeed();
+
+  accumulator += dt;
+  const stepTime = 1 / speed;
+
+  // FIX #5: Limit updates to 1 per frame
+  if (accumulator >= stepTime) {
+    accumulator = 0;
+    moveSnake();
+    if (!gameRunning) return;
+  }
+}
+
+/* ======================== MOVE ======================== */
+function moveSnake() {
+  direction = nextDirection;
+  let head = { x: snake[0].x, y: snake[0].y };
+
+  if (direction === "LEFT") head.x--;
+  if (direction === "RIGHT") head.x++;
+  if (direction === "UP") head.y--;
+  if (direction === "DOWN") head.y++;
+
+  if (head.x <= 0 || head.y <= 0 || head.x >= cols - 1 || head.y >= rows - 1) {
+    endGame();
+    return;
+  }
+
+  // FIX #13: Use Set for collision detection
+  if (occupiedCells.has(head.x + "," + head.y)) {
+    endGame();
+    return;
+  }
+
+  snake.unshift(head);
+  occupiedCells.add(head.x + "," + head.y); // FIX #13: Update Set
+
+  if (head.x === food.x && head.y === food.y) {
+    score++;
+    scoreChanged = true; // FIX #15: Mark score changed
+    food = randomFood();
+  } else {
+    const tail = snake.pop();
+    occupiedCells.delete(tail.x + "," + tail.y); // FIX #13: Update Set
+  }
+}
+
+/* ======================== DRAW ======================== */
+function draw() {
+  // FIX #6: Clear logical size only
+  ctx.clearRect(0, 0, cols * CONFIG.TILE_SIZE, rows * CONFIG.TILE_SIZE);
+
+  // FIX #2: Draw pre-rendered walls
+  ctx.drawImage(wallCanvas, 0, 0);
+
+  // Draw food
+  ctx.fillStyle = "#ffeb3b";
+  ctx.fillRect(food.x * CONFIG.TILE_SIZE, food.y * CONFIG.TILE_SIZE, CONFIG.TILE_SIZE, CONFIG.TILE_SIZE);
+
+  // FIX #3: Use rectangles for snake body, circles only for head
+  for (let i = 0; i < snake.length; i++) {
+    let segment = snake[i];
+    
+    if (i === 0) {  
+      // Head - keep circle with eyes
+      ctx.beginPath();
+      ctx.fillStyle = "#00ff00";  
+      ctx.arc(  
+        segment.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2,   
+        segment.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE / 2,   
+        CONFIG.TILE_SIZE / 2,   
+        0,   
+        Math.PI * 2  
+      );  
+      ctx.fill();  
+        
+      ctx.fillStyle = "white";  
+      ctx.beginPath();  
+      ctx.arc(  
+        segment.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE * 0.3,   
+        segment.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE * 0.3,   
+        2,   
+        0,   
+        Math.PI * 2  
+      );  
+      ctx.arc(  
+        segment.x * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE * 0.7,   
+        segment.y * CONFIG.TILE_SIZE + CONFIG.TILE_SIZE * 0.3,   
+        2,   
+        0,   
+        Math.PI * 2  
+      );  
+      ctx.fill();  
+    } else {
+      // FIX #3: Body - use rectangles instead of circles
+      ctx.fillStyle = i === snake.length - 1 ? "#006400" : `hsl(${(i * 10) % 360}, 80%, 50%)`;
+      ctx.fillRect(
+        segment.x * CONFIG.TILE_SIZE + 2,
+        segment.y * CONFIG.TILE_SIZE + 2,
+        CONFIG.TILE_SIZE - 4,
+        CONFIG.TILE_SIZE - 4
+      );
+    }
+  }
+  
+  // FIX #15: Batch UI updates
+  if (scoreChanged) {
+    document.getElementById("score").textContent = "Score: " + score;
+    scoreChanged = false;
+  }
+}
+
+/* ======================== GAME LOOP ======================== */
+function loop(time) {
+  if (!gameRunning) return;
+  
+  if (time - lastFrameTime < FRAME_TIME) {
+    requestAnimationFrame(loop);
+    return;
+  }
+
+  lastFrameTime = time;
+  let dt = (time - lastTime) / 1000;
+  lastTime = time;
+
+  if (dt > 0.1) dt = 0.1;
+
+  update(dt);
+  draw();
+
+  requestAnimationFrame(loop);
+}
+
+/* ======================== GAME OVER ======================== */
+const modal = document.getElementById("gameOverModal");
+const quitModal = document.getElementById("quitEndModal");
+const finalScore = document.getElementById("finalScore");
+const pauseOverlay = document.getElementById("pauseOverlay");
+
+function endGame() {
+  if (!gameRunning) return;
+  gameRunning = false;
+  paused = true;
+  finalScore.textContent = "Score: " + score;
+  modal.style.display = "flex";
+}
+
+/* ======================== CONTROLS ======================== */
+const pauseResumeBtn = document.getElementById("pauseResumeBtn");
+
+function togglePause() {
+  paused = !paused;
+  pauseResumeBtn.textContent = paused ? "Resume" : "Pause";
+  pauseOverlay.style.display = paused ? "flex" : "none";
+
+  if (!paused) {
+    lastTime = performance.now();
+    lastFrameTime = performance.now();
+    requestAnimationFrame(loop);
+  }
+}
+
+function resetGame() {
+  resizeCanvas();
+  snake = [{ x: Math.floor(cols / 2), y: Math.floor(rows / 2) }];
+  
+  // FIX #13: Rebuild occupancy set
+  occupiedCells.clear();
+  occupiedCells.add(snake[0].x + "," + snake[0].y);
+  
+  direction = "RIGHT";
+  nextDirection = "RIGHT";
+  food = randomFood();
+  score = 0;
+  scoreChanged = true; // FIX #15
+  speed = CONFIG.INITIAL_SPEED;
+  lastSpeedIncrease = 0;
+  accumulator = 0;
+  gameRunning = true;
+  paused = false;
+  gameWasPaused = false;
+  document.getElementById("score").textContent = "Score: " + score;
+  pauseResumeBtn.textContent = "Pause";
+  pauseOverlay.style.display = "none";
+  modal.style.display = "none";
+  quitModal.style.display = "none";
+  devLinkModal.style.display = "none";
+  thanksModal.style.display = "none";
+  loadingModal.style.display = "none";
+  homeConfirmModal.style.display = "none";
+  lastTime = performance.now();
+  lastFrameTime = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function initGame() {
+  // FIX #11: Lock canvas size during game
+  window.removeEventListener("resize", gameResizeListener);
+  
+  resizeCanvas();
+  snake = [{ x: Math.floor(cols / 2), y: Math.floor(rows / 2) }];
+  
+  // FIX #13: Initialize occupancy set
+  occupiedCells.clear();
+  occupiedCells.add(snake[0].x + "," + snake[0].y);
+  
+  direction = "RIGHT";
+  nextDirection = "RIGHT";
+  food = randomFood();
+  score = 0;
+  scoreChanged = true; // FIX #15
+  speed = CONFIG.INITIAL_SPEED;
+  lastSpeedIncrease = 0;
+  accumulator = 0;
+  gameRunning = true;
+  paused = false;
+  gameWasPaused = false;
+  document.getElementById("score").textContent = "Score: " + score;
+  pauseResumeBtn.textContent = "Pause";
+  pauseOverlay.style.display = "none";
+  modal.style.display = "none";
+  quitModal.style.display = "none";
+  lastTime = performance.now();
+  lastFrameTime = performance.now();
+  requestAnimationFrame(loop);
+}
+
+pauseResumeBtn.addEventListener("click", togglePause);
+document.getElementById("restartBtn").addEventListener("click", resetGame);
+document.getElementById("restartModalBtn").addEventListener("click", resetGame);
+document.getElementById("quitModalBtn").addEventListener("click", () => {
+  modal.style.display = "none";
+  quitModal.style.display = "flex";
+});
+document.getElementById("tryAgainBtn").addEventListener("click", resetGame);
+
+});
+      </script> 
+ 
+</body></html>
